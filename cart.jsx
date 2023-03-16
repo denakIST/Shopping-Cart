@@ -91,8 +91,11 @@ const Products = (props) => {
   } = ReactBootstrap;
   //  Fetch Data
   const { Fragment, useState, useEffect, useReducer } = React;
+  //const [query, setQuery] = useState("http://localhost:1337/api/products");
   const [query, setQuery] = useState("http://localhost:1337/api/products");
-  const [{ data, isLoading, isError }, doFetch] = useDataApi(
+  //const [{ data, isLoading, isError }, doFetch] = useDataApi(
+   // "http://localhost:1337/api/products",
+   const [{ data, isLoading, isError }, doFetch] = useDataApi(
     "http://localhost:1337/api/products",
     {
       data: [],
@@ -131,11 +134,11 @@ const Products = (props) => {
   const photos = ["apple.png", "orange.png", "beans.png", "cabbage.png"];
 
   let list = items.map((item, index) => {
-    let n = index + 1049;
-    let uhit = "https://picsum.photos/" + n;
+    let n = Math.floor(Math.random() * 100);
+    let url = "https://picsum.photos/id/" + n + "/50/50";
     return (
       <li key={index}>
-        <Image src={photos[index % 4]} width={70} roundedCircle></Image>
+        <Image src={url} width={70} roundedCircle></Image>
         <Button variant="primary" size="large">
           {item.name} instock: {item.instock}
         </Button>
@@ -186,28 +189,37 @@ const Products = (props) => {
 
   const restockProducts = (url) => {
     doFetch(url);
+
+/*
     let newItems = data.data.map((item) => {
       //let { name, country, cost, instock } = item.attributes;
       let { id, attributes: { name, country, cost, instock } } = item;  
       return { name, country, cost, instock };
     });
-
-    
-/*
-    let newStock = items.map((item, index) => {
-      let restockedItem = newItems.filter((ritem, rindex) => ritem.name == item.name);
-      if (restockedItem) {
-        item.instock == item.instock + restockedItem.instock;
-      };
-      if (!restockedItem) newStock = [...items, restockedItem]
-      return newStock;
-
-    })
-
-    setItems([...newStock]);*/
+    setItems([...items, ...newItems]);*/
 
 
-    setItems([...items, ...newItems]);
+     // mapping the dataset
+    let newData=[];
+
+    data.data.map((item, index) =>{
+    //newData.push(item.attributes);
+        newData.push({
+          name: item.attributes.product,
+          country: item.attributes.country,
+          cost: item.attributes.cost,
+          instock: item.attributes.instock
+        });
+        //setItems(newData);
+    });
+
+    newData = [...items,...newData]
+
+    console.log(`newData: ${JSON.stringify(newData)}`);
+
+    setItems(newData);
+
+
   };
   
   return (
@@ -230,8 +242,10 @@ const Products = (props) => {
       <Row>
         <form
           onSubmit={(event) => {
-            //restockProducts(`http://localhost:1337/api/${query}`);
+            //setQuery(e.target.value);
+
             restockProducts(`${query}`);
+            //restockProducts(`${query}`);
             console.log(`Restock called on ${query}`);
             event.preventDefault();
           }}
